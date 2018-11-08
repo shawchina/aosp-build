@@ -1,0 +1,45 @@
+# This dockerfile uses the ubuntu image
+# VERSION 0 - EDITION 1
+# Author:  Yen-Chin, Lee <yenchin@weintek.com>
+# Command format: Instruction [arguments / command] ..
+
+FROM ubuntu:16.04
+MAINTAINER Shawn.Xiao, shawchina@163.com
+
+# Yocto's depends (plus sudo)
+RUN apt-get --quiet --yes update && \
+apt-get --quiet --yes install gawk wget git-core diffstat unzip texinfo gcc-multilib \
+build-essential chrpath socat cpio python python3 python3-pip python3-pexpect \
+xz-utils debianutils iputils-ping libsdl1.2-dev xterm sudo
+
+# If you need to add more packages, just do additional RUN commands here
+# I've intentionally done this so that the layers before this don't have
+# to be regenerated and fetched since the above layer is big.
+# RUN apt-get --quiet --yes install something
+RUN apt-get --quiet --yes install tmux libncurses5-dev
+
+# Add some debug utilities
+RUN apt-get --quiet --yes install strace ltrace && pip3 install typing
+
+
+# Set the default shell to bash instead of dash
+RUN echo "dash dash/sh boolean false" | debconf-set-selections && dpkg-reconfigure dash
+
+# clean up
+RUN apt-get clean && \
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Set the locale, else yocto will complain
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# default workdir is /yocto
+WORKDIR /yocto
+
+# Add entry point, we use entrypoint.sh to mapping host user to
+# container
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

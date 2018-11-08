@@ -3,55 +3,33 @@
 # Author:  Yen-Chin, Lee <yenchin@weintek.com>
 # Command format: Instruction [arguments / command] ..
 
-FROM ubuntu:14.04
-MAINTAINER Yen-Chin, Lee, coldnew.tw@gmail.com
+FROM ubuntu:16.04
+MAINTAINER Shawn.Xiao, shawchina@163.com
 
-# Add 32bit package in package list
-RUN dpkg --add-architecture i386
+ENV DEBIAN_FRONTEND noninteractive
 
-# Update package infos first
-RUN apt-get update -y
+ADD sources.list /etc/apt/sources.list
+# Yocto's depends (plus sudo)
+RUN apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LANG en_US.utf8
 
-## Install requred packages:
-# http://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html
+# Install AOSP dependencies
+RUN export DEBIAN_FRONTEND=noninteractive && \
+	apt-get --quiet --yes update && \
+	apt-get -y install git-core gnupg flex bison gperf build-essential \
+      	zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
+      	lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache \
+      	libgl1-mesa-dev libxml2-utils xsltproc unzip python bc openjdk-8-jdk && \
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+	rm -rf /var/cache/*
 
-# Essentials
-RUN apt-get install -y gawk wget git-core diffstat unzip texinfo gcc-multilib \
-     build-essential chrpath socat cpio python python3 python3-pip python3-pexpect \
-     xz-utils debianutils iputils-ping vim bc g++-multilib
 
-# Graphical and Eclipse Plug-In Extras
-RUN apt-get install -y libsdl1.2-dev xterm
 
-# Documentation
-RUN apt-get install -y make xsltproc docbook-utils fop dblatex xmlto
 
-# OpenEmbedded Self-Test
-RUN apt-get install -y python-git
-
-# Extra package for build with NXP's images
-RUN apt-get install -y \
-    sed cvs subversion coreutils texi2html \
-    python-pysqlite2 help2man  gcc g++ \
-    desktop-file-utils libgl1-mesa-dev libglu1-mesa-dev mercurial \
-    autoconf automake groff curl lzop asciidoc u-boot-tools
-
-# Extra package for Xilinx PetaLinux
-RUN apt-get install -y xvfb libtool libncurses5-dev libssl-dev zlib1g-dev:i386 tftpd
-
-# Install repo tool for some bsp case, like NXP's yocto
-RUN curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > /usr/bin/repo
-RUN chmod a+x /usr/bin/repo
-
-# Install Java
-RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  apt-get install -y software-properties-common && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
+# Set the default shell to bash instead of dash
+RUN echo "dash dash/sh boolean false" | debconf-set-selections && dpkg-reconfigure dash
 
 # Set the locale, else yocto will complain
 RUN locale-gen en_US.UTF-8
@@ -60,7 +38,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # default workdir is /yocto
-WORKDIR /yocto
+WORKDIR /aosp
 
 # Add entry point, we use entrypoint.sh to mapping host user to
 # container
