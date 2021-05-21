@@ -17,7 +17,7 @@ ENV LANG en_US.utf8
 # Install AOSP dependencies
 RUN export DEBIAN_FRONTEND=noninteractive && \
 	apt-get --quiet --yes update && \
-	apt-get -y install git-core gnupg flex bison gperf build-essential \
+	apt-get -y install git-core vim  libssl-dev bear bc gnupg flex bison gperf build-essential \
       	zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
       	lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache \
       	libgl1-mesa-dev libxml2-utils xsltproc unzip python bc openjdk-8-jdk && \
@@ -38,7 +38,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # default workdir is /yocto
-WORKDIR /aosp
+WORKDIR /wks
 
 # Add entry point, we use entrypoint.sh to mapping host user to
 # container

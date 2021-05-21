@@ -30,6 +30,7 @@ SNAME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 YOCTODIR="${SDIR}"
 IMAGE="coldnew/yocto-build"
 CONTAINER="yocto-build"
+HOST_USER=xiaofei
 
 ############################################################
 #### Library for common usage functions
@@ -181,7 +182,7 @@ do
             INFO "Creating container $CONTAINER"
             USER=$(whoami)
             docker run -it \
-                   --volume="$YOCTODIR:/yocto" \
+                   --volume="$YOCTODIR:/wks" \
                    --volume="${HOME}/.ssh:/home/${USER}/.ssh" \
                    --volume="${HOME}/.gitconfig:/home/${USER}/.gitconfig" \
                    --volume="/etc/localtime:/etc/localtime:ro" \
