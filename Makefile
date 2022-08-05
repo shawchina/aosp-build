@@ -1,10 +1,10 @@
 all: build
 
 build:
-	docker build -t coldnew/yocto-build .
+	docker build -t shawchina/yocto-build .
 
 run:
-	docker run -it coldnew/yocto-build
+	docker run -it shawchina/yocto-build
 
 deploy:
-	docker push coldnew/yocto-build
+	docker push shawchina/yocto-build

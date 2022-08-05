@@ -28,7 +28,7 @@ SNAME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
 # check for directory architecture
 YOCTODIR="${SDIR}"
-IMAGE="coldnew/yocto-build"
+IMAGE="shawchina/yocto-build"
 CONTAINER="yocto-build"
 HOST_USER=xiaofei
 
